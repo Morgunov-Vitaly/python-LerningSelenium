@@ -1,13 +1,17 @@
 from selenium import webdriver
 import configparser
 import time
-import random
+from datetime import datetime
+# https://pypi.org/project/fake-useragent/ pip install fake-useragent
+from fake_useragent import UserAgent
 
-userAgents = [
-    "Hello from F!",
-    "best of the best",
-    "another world"
-]
+useragent = UserAgent()
+
+
+def get_file_name():
+    now = datetime.now()
+    return f"{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}-{now.second}_user_agent.png"
+
 
 #  Читаем настройки программы
 config = configparser.ConfigParser()
@@ -17,25 +21,16 @@ config.read("./../settings.ini")
 OS: str = config["OperatingSystem"]["OS"]
 siteUrl: str = config["Firefox"]["site_url"]
 driverPath: str = config["Firefox"]["driver_url"]
-# userAgent: str = config["Firefox"]["user_agent"]
 
 # Options
-options = webdriver .FirefoxOptions()
-# options.add_argument("user-agent=" + userAgent)
-options.add_argument(f"user-agent={random.choice(userAgents)}")
+options = webdriver.FirefoxOptions()
+# set_preference vs add_argument в Chrome
+options.set_preference("general.useragent.override", useragent. random)
+# Возможны варианты:
+#  Просто строка "Hello!"
+# Вариации браузера opera: useragent.opera
+# Полностью рандомные варианты  useragent.random
 
-# print("driverPath: " + driverPath)
-# print("siteUrl: " + siteUrl)
-# print("OS: " + OS)
-# print("userAgent: " + userAgent)
-
-#  Распарсить путь для ОС  Windows так:
-# C:\\users\\LearningSelenium\\chromedriver\\chromedriver.exe
-#  или так ( синтаксис сырой строки):  r"C:\users\LearningSelenium\chromedriver\chromedriver.exe"
-# if OS == "Windows":
-#     print("It is Windows")
-# else:
-#     print("It is not Windows")
 
 driver = webdriver.Firefox(
     executable_path=driverPath,
@@ -43,13 +38,10 @@ driver = webdriver.Firefox(
 )
 
 try:
-    # driver.get(url=siteUrl)
-    # driver.save_screenshot("Screenshot.png")
-    # time.sleep(3)
-
     # Проверка юзерагента
     driver.get("https://whatismybrowser.com/detect/what-is-my-user-agent")
-    driver.save_screenshot("UserAgent.png")
+
+    driver.save_screenshot(get_file_name())
     time.sleep(3)
 except Exception as ex:
     print("Error message:")

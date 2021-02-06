@@ -1,13 +1,11 @@
 from selenium import webdriver
 import configparser
 import time
-import random
+# https://pypi.org/project/fake-useragent/ pip install fake-useragent
+from fake_useragent import UserAgent
+from datetime import datetime
 
-userAgents = [
-    "Hello from C!",
-    "best of the best",
-    "another world"
-]
+useragent = UserAgent()
 
 #  Читаем настройки программы
 config = configparser.ConfigParser()  # создаём объекта парсера
@@ -17,39 +15,30 @@ config.read("../settings.ini")  # читаем конфиг
 OS: str = config["OperatingSystem"]["OS"]
 siteUrl: str = config["Chrome"]["site_url"]
 driverPath: str = config["Chrome"]["driver_url"]
-# userAgent: str = config["Chrome"]["user_agent"]
-
-print("driverPath: " + driverPath)
-print("siteUrl: " + siteUrl)
-print("OS: " + OS)
-# print("userAgent: " + userAgent)
 
 # Options
 options = webdriver.ChromeOptions()
-# options.add_argument("user-agent=" + userAgent)
-options.add_argument(f"user-agent={random.choice(userAgents)}")
-
-#  Распарсить путь для ОС  Windows так:
-# "C:\\users\\LearningSelenium\\chromedriver\\chromedriver.exe"
-#  или так ( синтаксис сырой строки):  r"C:\users\LearningSelenium\chromedriver\chromedriver.exe"
-if OS == "Windows":
-    print("It is Windows")
-else:
-    print("It is not Windows")
+options.add_argument(f"user-agent={useragent.random}")
+# Возможны варианты:
+# Вариации браузера opera: useragent.opera
+# Полностью рандомные варианты  useragent.random
 
 driver = webdriver.Chrome(
     executable_path=driverPath,
     options=options
 )
 
-try:
-    # driver.get(url=siteUrl)
-    # driver.save_screenshot("Screenshot1.png")
-    # time.sleep(3)
 
+def get_file_name():
+    now = datetime.now()
+    return f"{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}-{now.second}_user_agent.png"
+
+
+try:
     # Проверка юзерагента
     driver.get("https://whatismybrowser.com/detect/what-is-my-user-agent")
-    driver.save_screenshot("UserAgent.png")
+    filename = get_file_name()
+    driver.save_screenshot(filename)
     time.sleep(3)
 except Exception as ex:
     print("Error message:")
